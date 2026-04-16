@@ -1,0 +1,91 @@
+<div class="flex min-h-screen bg-white font-sans">
+  
+  <div class="hidden lg:flex lg:w-[45%] bg-[#0A0A0A] text-white flex-col justify-between p-12 xl:p-16 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+    
+    <div class="relative z-10">
+      <div class="flex items-center gap-3 font-bold text-xl tracking-wide uppercase">
+        <div class="w-8 h-8 bg-white text-black rounded flex items-center justify-center">
+          <i class="pi pi-building text-sm"></i>
+        </div>
+        RIVIO HRMS
+      </div>
+    </div>
+
+    <div class="relative z-10 mb-20">
+      <h1 class="text-5xl xl:text-6xl font-semibold leading-tight tracking-tight mb-6">
+        Manage your workforce with precision.
+      </h1>
+      <p class="text-gray-400 text-lg max-w-md font-light leading-relaxed">
+        The centralized enterprise platform designed to automate payroll, track attendance, and scale your operations seamlessly.
+      </p>
+    </div>
+
+    <div class="relative z-10 flex items-center justify-between text-xs text-gray-500 uppercase tracking-widest font-semibold">
+      <span>System v1.0</span>
+      <span>&copy; 2026 Rivio</span>
+    </div>
+  </div>
+
+  <div class="w-full lg:w-[55%] flex items-center justify-center p-8 sm:p-12 xl:p-24 relative bg-white">
+    
+    <div class="w-full max-w-md">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Sign In</h2>
+        <p class="text-gray-500 mt-2 font-medium">Enter your corporate credentials to continue.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+        
+        @if (errorMessage()) {
+          <div class="bg-red-50 border-l-4 border-red-600 p-4 flex items-start gap-3">
+            <i class="pi pi-exclamation-triangle text-red-600 mt-0.5"></i>
+            <p class="text-sm text-red-800 font-medium">{{ errorMessage() }}</p>
+          </div>
+        }
+
+        <div class="flex flex-col gap-2">
+          <label for="email" class="text-sm font-bold text-gray-900 uppercase tracking-wide">Corporate Email</label>
+          <input 
+            id="email" 
+            type="email" 
+            pInputText 
+            formControlName="email" 
+            placeholder="admin@rivio.com"
+            class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-none text-gray-900 focus:border-black focus:ring-0 transition-colors outline-none"
+            [ngClass]="{'!border-red-500': loginForm.controls.email.touched && loginForm.controls.email.invalid}" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <label for="password" class="text-sm font-bold text-gray-900 uppercase tracking-wide">Password</label>
+            <a href="#" class="text-xs font-bold text-gray-500 hover:text-black uppercase tracking-wide transition-colors">Forgot?</a>
+          </div>
+          <p-password 
+            id="password" 
+            formControlName="password" 
+            [toggleMask]="true" 
+            [feedback]="false"
+            styleClass="w-full"
+            inputStyleClass="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-none text-gray-900 focus:border-black focus:ring-0 transition-colors outline-none"
+            placeholder="••••••••">
+          </p-password>
+        </div>
+
+        <button 
+          type="submit" 
+          [disabled]="loginForm.invalid || isLoading()"
+          class="mt-4 w-full bg-black text-white font-bold uppercase tracking-widest py-4 rounded-none hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-3">
+          @if (isLoading()) {
+            <i class="pi pi-spinner animate-spin"></i>
+            Verifying...
+          } @else {
+            Access Dashboard
+            <i class="pi pi-arrow-right text-sm"></i>
+          }
+        </button>
+      </form>
+      
+    </div>
+  </div>
+</div>
