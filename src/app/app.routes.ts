@@ -19,7 +19,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
+        loadComponent: () => import('./features/dashboard/admin-dashboard/admin-dashboard').then(m => m.AdminDashboardComponent)
       },
       {
         path: 'company',
@@ -27,7 +27,16 @@ export const routes: Routes = [
       },
       {
         path: 'employees',
-        loadComponent: () => import('./features/employees/employee-directory/employee-directory').then(m => m.EmployeeDirectory)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/employees/employee-directory/employee-directory').then(m => m.EmployeeDirectoryComponent)
+          },
+          {
+            path: ':id', // Dynamic route for the profile view
+            loadComponent: () => import('./features/employees/employee-profile/employee-profile').then(m => m.EmployeeProfileComponent)
+          }
+        ]
       },
       {
         path: 'leave',

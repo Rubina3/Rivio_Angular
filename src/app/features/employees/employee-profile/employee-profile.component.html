@@ -1,0 +1,214 @@
+<div class="h-full flex flex-col bg-white overflow-y-auto">
+  
+  <div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center gap-3 text-sm">
+      <a routerLink="/employees" class="text-gray-500 hover:text-blue-600 font-medium transition-colors">Directory</a>
+      <i class="pi pi-angle-right text-gray-400 text-xs"></i>
+      <span class="text-gray-900 font-semibold">
+        @if (isLoading()) { Loading... } @else { {{ employee()?.firstName }} {{ employee()?.lastName }} }
+      </span>
+    </div>
+    <div class="flex items-center gap-3">
+      @if (employee()?.status === 'ACTIVE') {
+        <button (click)="openTerminateModal()" class="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors flex items-center gap-2">
+          <i class="pi pi-user-minus"></i> Terminate
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="p-6"><p-skeleton width="100%" height="20rem"></p-skeleton></div>
+  } @else if (hasError() || !employee()) {
+    <div class="p-12 text-center text-red-500 font-bold">Profile Not Found</div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      
+      <div class="lg:col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden sticky top-0">
+        <div class="p-8 flex flex-col items-center text-center border-b border-gray-100 relative">
+          <div class="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold tracking-wide mb-4 shadow-sm" [ngClass]="getAvatarClass(employee()?.firstName)">
+            {{ employee()!.firstName.charAt(0) }}{{ employee()!.lastName.charAt(0) }}
+          </div>
+          <h2 class="text-xl font-bold text-gray-900">{{ employee()!.firstName }} {{ employee()!.lastName }}</h2>
+          <p class="text-sm font-medium text-blue-600 mt-1">{{ employee()!.designationTitle }}</p>
+          <div class="mt-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border" [ngClass]="getStatusClasses(employee()!.status)">
+              {{ employee()!.status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="p-6 bg-gray-50 flex flex-col gap-4 relative">
+          <button (click)="openBasicInfoModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-gray-500 hover:text-blue-600 hover:border-blue-600 transition-colors" title="Edit Contact Info">
+            <i class="pi pi-pencil text-xs"></i>
+          </button>
+          
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee ID</span>
+            <span class="text-sm font-medium text-gray-900 font-mono">{{ employee()!.employeeCode }}</span>
+          </div>
+          <div class="flex flex-col gap-1 mt-2">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Address</span>
+            <span class="text-sm font-medium text-gray-900 break-all">{{ employee()!.userEmail }}</span>
+          </div>
+          <div class="flex flex-col gap-1 mt-2">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</span>
+            <span class="text-sm font-medium text-gray-900">{{ employee()!.phoneNo || 'Not Provided' }}</span>
+          </div>
+          <div class="flex flex-col gap-1 mt-2">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank Account</span>
+            <span class="text-sm font-medium text-gray-900 font-mono tracking-wider">{{ employee()!.bankAccount || 'Pending Submission' }}</span>
+          </div>
+          
+          <button (click)="openPasswordModal()" class="mt-4 w-full px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
+            <i class="pi pi-lock text-xs"></i> Reset App Password
+          </button>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3 flex flex-col">
+        <div class="flex border-b border-gray-200 mb-6 gap-6">
+          <button (click)="activeTab.set('OVERVIEW')" [class.text-blue-600]="activeTab() === 'OVERVIEW'" [class.border-blue-600]="activeTab() === 'OVERVIEW'" [class.text-gray-500]="activeTab() !== 'OVERVIEW'" [class.border-transparent]="activeTab() !== 'OVERVIEW'" class="pb-3 border-b-2 text-sm font-bold uppercase tracking-wider transition-colors">Overview</button>
+          <button (click)="activeTab.set('ATTENDANCE')" [class.text-blue-600]="activeTab() === 'ATTENDANCE'" [class.border-blue-600]="activeTab() === 'ATTENDANCE'" [class.text-gray-500]="activeTab() !== 'ATTENDANCE'" [class.border-transparent]="activeTab() !== 'ATTENDANCE'" class="pb-3 border-b-2 text-sm font-bold uppercase tracking-wider transition-colors">Leave Balances</button>
+        </div>
+
+        @if (activeTab() === 'OVERVIEW') {
+          <div class="flex flex-col gap-6 animate-fadein">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-8 relative">
+              <button (click)="openJobDetailsModal()" class="absolute top-6 right-8 text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-2">
+                <i class="pi pi-pencil text-xs"></i> Edit Job Details
+              </button>
+              
+              <h3 class="text-lg font-bold text-gray-900 mb-6 border-b border-gray-100 pb-3">Employment Details</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
+                <div class="flex flex-col gap-1.5">
+                  <span class="text-sm font-semibold text-gray-500">Date of Joining</span>
+                  <span class="text-base font-medium text-gray-900 flex items-center gap-2"><i class="pi pi-calendar text-gray-400"></i> {{ employee()!.joiningDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <span class="text-sm font-semibold text-gray-500">Department</span>
+                  <span class="text-base font-medium text-gray-900">{{ employee()!.departmentName }}</span>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <span class="text-sm font-semibold text-gray-500">Work Location</span>
+                  <span class="text-base font-medium text-gray-900">{{ employee()!.locationName || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <span class="text-sm font-semibold text-gray-500">Reporting Manager</span>
+                  <span class="text-base font-medium text-blue-600 font-semibold">{{ employee()!.managerName || 'No Manager Assigned' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab() === 'ATTENDANCE') {
+          <div class="animate-fadein">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Leave Balances (2026)</h3>
+            
+            @if (leaveBalances().length === 0) {
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center text-gray-500">No leave balances found for this employee.</div>
+            } @else {
+              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                @for (leave of leaveBalances(); track leave.id) {
+                  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full" [ngClass]="{'bg-blue-500': leave.leaveTypeName === 'Sick Leave', 'bg-green-500': leave.leaveTypeName !== 'Sick Leave'}"></div>
+                    <h4 class="text-base font-bold text-gray-900 mb-4">{{ leave.leaveTypeName }}</h4>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div class="flex flex-col">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Available</span>
+                        <span class="text-2xl font-extrabold" [ngClass]="leave.balance > 0 ? 'text-green-600' : 'text-red-500'">{{ leave.balance }}</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Consumed</span>
+                        <span class="text-2xl font-extrabold text-gray-800">{{ leave.consumed }}</span>
+                      </div>
+                    </div>
+                    <div class="mt-4 text-xs font-medium text-gray-400 text-right border-t border-gray-50 pt-2">
+                      Total Allotted: {{ leave.allotted }}
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<p-dialog [(visible)]="isBasicInfoModalOpen" [modal]="true" header="Edit Contact & Financial Info" [style]="{ width: '100%', maxWidth: '500px' }" styleClass="rounded-xl shadow-2xl border-0 overflow-hidden" contentStyleClass="p-6 bg-white" headerStyleClass="bg-gray-50 border-b border-gray-200 p-6 text-lg font-bold text-gray-900">
+  <form [formGroup]="basicInfoForm" (ngSubmit)="submitBasicInfo()" class="flex flex-col gap-5">
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-gray-700">Phone Number</label>
+      <input pInputText formControlName="phoneNo" placeholder="e.g. 9988776655" class="w-full p-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-blue-600 outline-none" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-gray-700">Bank Account</label>
+      <input pInputText formControlName="bankAccount" placeholder="e.g. NEW-BANK-12345" class="w-full p-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-blue-600 outline-none font-mono" />
+    </div>
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+      <button type="button" (click)="isBasicInfoModalOpen.set(false)" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+      <button type="submit" [disabled]="isSubmitting()" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">Save Changes</button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog [(visible)]="isJobDetailsModalOpen" [modal]="true" header="Update Job Details" [style]="{ width: '100%', maxWidth: '600px' }" styleClass="rounded-xl shadow-2xl border-0 overflow-hidden" contentStyleClass="p-6 bg-white" headerStyleClass="bg-gray-50 border-b border-gray-200 p-6 text-lg font-bold text-gray-900">
+  <form [formGroup]="jobDetailsForm" (ngSubmit)="submitJobDetails()" class="flex flex-col gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-semibold text-gray-700">Department</label>
+        <p-select [options]="departments()" formControlName="departmentId" optionLabel="name" optionValue="id" styleClass="w-full border-gray-300 rounded-lg"></p-select>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-semibold text-gray-700">Designation</label>
+        <p-select [options]="filteredDesignations()" formControlName="designationId" optionLabel="title" optionValue="id" [disabled]="!jobDetailsForm.controls.departmentId.value" styleClass="w-full border-gray-300 rounded-lg disabled:bg-gray-100 disabled:opacity-70"></p-select>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-semibold text-gray-700">Location</label>
+        <p-select [options]="locations()" formControlName="locationId" optionLabel="name" optionValue="id" styleClass="w-full border-gray-300 rounded-lg"></p-select>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-semibold text-gray-700">Reporting Manager</label>
+        <p-select [options]="managers()" formControlName="reportsToProfileId" [showClear]="true" placeholder="Unassigned" styleClass="w-full border-gray-300 rounded-lg"></p-select>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+      <button type="button" (click)="isJobDetailsModalOpen.set(false)" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+      <button type="submit" [disabled]="isSubmitting() || jobDetailsForm.invalid" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">Update Assignment</button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog [(visible)]="isTerminateModalOpen" [modal]="true" header="Terminate Employee" [style]="{ width: '100%', maxWidth: '400px' }" styleClass="rounded-xl shadow-2xl border-0 overflow-hidden" contentStyleClass="p-6 bg-white" headerStyleClass="bg-red-50 border-b border-red-100 p-6 text-lg font-bold text-red-900">
+  <form [formGroup]="terminateForm" (ngSubmit)="submitTerminate()" class="flex flex-col gap-5">
+    <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3 mb-2">
+      <i class="pi pi-exclamation-triangle text-red-600 mt-0.5"></i>
+      <p class="text-sm text-red-800 font-medium leading-relaxed">Warning: Terminating an employee will revoke their system access immediately.</p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-gray-700">Effective Exit Date</label>
+      <p-datepicker formControlName="exitDate" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full p-3 border border-gray-300 rounded-lg focus:border-red-600 outline-none"></p-datepicker>
+    </div>
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+      <button type="button" (click)="isTerminateModalOpen.set(false)" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+      <button type="submit" [disabled]="isSubmitting() || terminateForm.invalid" class="px-5 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">Confirm Termination</button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog [(visible)]="isPasswordModalOpen" [modal]="true" header="Reset Application Password" [style]="{ width: '100%', maxWidth: '400px' }" styleClass="rounded-xl shadow-2xl border-0 overflow-hidden" contentStyleClass="p-6 bg-white" headerStyleClass="bg-gray-50 border-b border-gray-200 p-6 text-lg font-bold text-gray-900">
+  <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordReset()" class="flex flex-col gap-5">
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-gray-700">New Temporary Password</label>
+      <p-password formControlName="newPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full p-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-blue-600 outline-none" placeholder="••••••••"></p-password>
+    </div>
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+      <button type="button" (click)="isPasswordModalOpen.set(false)" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+      <button type="submit" [disabled]="isSubmitting() || passwordForm.invalid" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">Reset Password</button>
+    </div>
+  </form>
+</p-dialog>

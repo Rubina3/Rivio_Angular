@@ -1,1 +1,142 @@
-<p>admin-dashboard works!</p>
+<div class="flex flex-col gap-8 max-w-7xl mx-auto">
+  
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">System Overview</h1>
+      <p class="text-sm text-gray-500 mt-1">Here is what is happening across Rivio today.</p>
+    </div>
+    
+    <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
+      <div class="relative flex h-3 w-3">
+        @if (isSystemHealthy()) {
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+        } @else {
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+        }
+      </div>
+      <span class="text-xs font-semibold uppercase tracking-wider" [ngClass]="isSystemHealthy() ? 'text-green-700' : 'text-red-700'">
+        {{ isSystemHealthy() ? 'API Systems Online' : 'API Systems Degraded' }}
+      </span>
+    </div>
+  </div>
+
+  @if (hasError()) {
+    <div class="bg-red-50 p-6 rounded-2xl border border-red-100 flex flex-col items-center justify-center text-center">
+      <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-3">
+        <i class="pi pi-exclamation-triangle text-xl"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900">Unable to load metrics</h3>
+      <p class="text-gray-500 mb-4 max-w-sm">We couldn't connect to the analytics server. Please verify the backend is running.</p>
+      <p-button label="Try Again" icon="pi pi-refresh" severity="secondary" (onClick)="fetchDashboardData()"></p-button>
+    </div>
+  }
+
+  @if (!hasError()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      @if (isLoading()) {
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-[140px] flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <p-skeleton width="60%" height="1.5rem"></p-skeleton>
+              <p-skeleton shape="circle" size="3rem"></p-skeleton>
+            </div>
+            <p-skeleton width="30%" height="2.5rem"></p-skeleton>
+          </div>
+        }
+      }
+
+      @if (!isLoading() && summary()) {
+        
+        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl shadow-lg shadow-blue-500/30 text-white relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 cursor-pointer">
+          <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+          <div class="flex justify-between items-start relative z-10">
+            <h3 class="text-blue-100 font-medium tracking-wide">Active Employees</h3>
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <i class="pi pi-users text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 relative z-10">
+            <h2 class="text-4xl font-extrabold">{{ summary()!.totalActiveEmployees }}</h2>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-fuchsia-500 to-purple-600 p-6 rounded-3xl shadow-lg shadow-purple-500/30 text-white relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 cursor-pointer">
+          <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+          <div class="flex justify-between items-start relative z-10">
+            <h3 class="text-fuchsia-100 font-medium tracking-wide">Open Positions</h3>
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <i class="pi pi-briefcase text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 relative z-10">
+            <h2 class="text-4xl font-extrabold">{{ summary()!.totalOpenJobs }}</h2>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-400 to-orange-500 p-6 rounded-3xl shadow-lg shadow-orange-500/30 text-white relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 cursor-pointer">
+          <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+          <div class="flex justify-between items-start relative z-10">
+            <h3 class="text-orange-100 font-medium tracking-wide">Leave Requests</h3>
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <i class="pi pi-calendar-minus text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 relative z-10">
+            <h2 class="text-4xl font-extrabold">{{ summary()!.pendingLeaveRequests }}</h2>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-400 to-teal-500 p-6 rounded-3xl shadow-lg shadow-teal-500/30 text-white relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-300 cursor-pointer">
+          <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+          <div class="flex justify-between items-start relative z-10">
+            <h3 class="text-teal-100 font-medium tracking-wide">Total Candidates</h3>
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <i class="pi pi-id-card text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 relative z-10">
+            <h2 class="text-4xl font-extrabold">{{ summary()!.totalCandidates }}</h2>
+          </div>
+        </div>
+
+      }
+    </div>
+  }
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+    <div class="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+      <div class="flex flex-col gap-3">
+        <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 text-gray-700 rounded-xl font-medium transition-colors flex items-center justify-between group">
+          <span class="flex items-center gap-3"><i class="pi pi-user-plus text-blue-500"></i> Onboard Employee</span>
+          <i class="pi pi-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+        <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-orange-50 hover:text-orange-700 text-gray-700 rounded-xl font-medium transition-colors flex items-center justify-between group">
+          <span class="flex items-center gap-3"><i class="pi pi-check-circle text-orange-500"></i> Approve Leaves</span>
+          <i class="pi pi-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+        <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-purple-50 hover:text-purple-700 text-gray-700 rounded-xl font-medium transition-colors flex items-center justify-between group">
+          <span class="flex items-center gap-3"><i class="pi pi-plus text-purple-500"></i> Create Job Posting</span>
+          <i class="pi pi-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="lg:col-span-2 bg-[#0A0A0A] p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-white relative overflow-hidden flex flex-col justify-center">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full"></div>
+      
+      <div class="relative z-10 flex items-center gap-6">
+        <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
+          <i class="pi pi-sparkles text-2xl text-blue-400"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold mb-2">Welcome to the future of HR.</h2>
+          <p class="text-gray-400 font-medium">Your payroll, attendance, and recruitment data is fully synced and processing in real-time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

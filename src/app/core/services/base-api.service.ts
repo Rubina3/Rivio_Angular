@@ -39,6 +39,12 @@ export class BaseApiService {
     );
   }
 
+  patch<T>(endpoint: string, body: any): Observable<T> {
+    return this.http.patch<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, body).pipe(
+      map(response => response.data)
+    );
+  }
+
   // Generic DELETE request
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<ApiResponse<T>>(`${this.baseUrl}${endpoint}`).pipe(
