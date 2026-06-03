@@ -4,5 +4,5 @@
 // };
 export const environment = {
   production: false,
-  apiUrl: 'https://riviobackendspringboot-production-a9df.up.railway.app/api'
+  apiUrl: 'https://riviobackendspringboot-production-46c8.up.railway.app/api'
 };
